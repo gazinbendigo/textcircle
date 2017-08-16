@@ -3,20 +3,10 @@ this.Documents = new Mongo.Collection("documents");
 
 if (Meteor.isClient){
 	
-	Meteor.setInterval(function(){
-		Session.set("current_date", new Date());
-	}, 1000);
-	
-	
-	Template.date_display.helpers({
-		current_date: function(){
-			return Session.get("current_date");
-		}
-	});
-	
+
 	Template.editor.helpers({
 		docid: function() {
-			let doc = Documents.findOne();
+			var doc = Documents.findOne();
 			if(doc) {
 				//Dont act on an id that isnt there.
 				return doc._id;
@@ -24,8 +14,20 @@ if (Meteor.isClient){
 			else {
 				return undefined;
 			}
-		}
+		},
+        config: function() {
+			return function(editor){
+				//set an event listener on the editor
+				editor.on("change", function(cm_editor, info){
+					//Use jquery to find the iframes dom and then inject the contents of
+					//cm_editor into the iframe
+					$("#viewer_iframe").contents().find("html").html(cm_editor.getValue());
+				});
+			}
+        }
+
 	});
+
 }
 
 if (Meteor.isServer){
